@@ -163,20 +163,32 @@
     let flipped = false;
     let wrongCards = JSON.parse(localStorage.getItem('wrongCards') || '[]');
     let speechLang = 'en-US';
+
+    // Load from localStorage nếu có
+    const storedData = localStorage.getItem('flashcardData');
+    if (storedData) {
+      try {
+        allCards = JSON.parse(storedData);
+        cards = [...allCards];
+        showCard();
+      } catch (e) { console.error('Lỗi khi đọc dữ liệu đã lưu'); }
+    }
+
     document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-        switch (e.key.toLowerCase()) {
-            case 'arrowleft': return prevCard();
-            case 'arrowright': return nextCard();
-            case 'shift':
-            case 'enter': return flipCard();
-            case ' ': e.preventDefault(); return shuffleCards();
-            case 's': return speakCard();
-            case 'r': return reviewWrong();
-            case 'c': return clearWrongCards();
-            case 'x': return markWrong();
-        }
-        });
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      switch (e.key.toLowerCase()) {
+        case 'arrowleft': return prevCard();
+        case 'arrowright': return nextCard();
+        case 'shift':
+        case 'enter': return flipCard();
+        case ' ': e.preventDefault(); return shuffleCards();
+        case 's': return speakCard();
+        case 'r': return reviewWrong();
+        case 'c': return clearWrongCards();
+        case 'x': return markWrong();
+      }
+    });
+
     document.getElementById('langSelect').addEventListener('change', function() {
       speechLang = this.value;
     });
@@ -195,6 +207,8 @@
         currentIndex = 0;
         flipped = false;
         showCard();
+        // Lưu vào localStorage
+        localStorage.setItem('flashcardData', JSON.stringify(allCards));
       };
       reader.readAsText(file);
     });
@@ -258,15 +272,26 @@
       updateWrongList();
     }
 
+    let reviewingWrong = false;
+
     function reviewWrong() {
-      if (wrongCards.length === 0) {
+    if (wrongCards.length === 0) {
         alert('Chưa có từ sai nào được ghi nhận.');
         return;
-      }
-      cards = [...wrongCards];
-      currentIndex = 0;
-      flipped = false;
-      showCard();
+    }
+    if (!reviewingWrong) {
+        cards = [...wrongCards];
+        currentIndex = 0;
+        flipped = false;
+        reviewingWrong = true;
+        showCard();
+    } else {
+        cards = [...allCards];
+        currentIndex = 0;
+        flipped = false;
+        reviewingWrong = false;
+        showCard();
+    }
     }
 
     function clearWrongCards() {
