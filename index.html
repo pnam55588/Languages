@@ -200,7 +200,7 @@
       reader.onload = function (e) {
         const lines = e.target.result.split('\n');
         allCards = lines.map(line => {
-          const [front, back] = line.split('-').map(part => part.trim());
+          const [front, back] = line.split(';').map(part => part.trim());
           return { front, back };
         }).filter(card => card.front && card.back);
         cards = [...allCards];
